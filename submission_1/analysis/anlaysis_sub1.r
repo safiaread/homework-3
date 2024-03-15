@@ -1,9 +1,133 @@
+#Analysis Workspace 
+
+#Loading in cleaned dataframe
+data <- read_rds("data/output/TaxBurden_Data.rds")
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata)
+
+#Finding changes in tax and prices of cigarettes, also putting in 2012 dollars
+data <- data%>%
 group_by(state)%>%
 arrange(state, Year)%>%
 mutate(tax_change = tax_state-lag(tax_state), 
 tax_change_d = ifelse(tax_change == 0,0,1), 
-price_cpi_2022 = cost_per_pack*(cpi_2022/index), 
-# for tax : price_cpi_2022 = cost_per_pack*(cpi_2022/index)
+price_cpi_2022 = cost_per_pack*(cpi_2012/index), 
+total_tax_cpi_2022 = tax_revenue*(cpi_2012/index),
 ln_tax_2012 = log(total_tax_cpi_2022),
-ln_sales
-ln_price
+ln_sales = log(sales_per_capita),
+ln_price = log(price_cpi_2022))
+
+#Question 1
+q1 <- data %>%
+filter(Year <= 1985)%>%
+group_by(Year)%>%
+summarise(count_tax_change = sum(tax_change_d, na.rm = TRUE))
+
+figure_q1 <- ggplot(q1, aes(x = Year, y = count_tax_change)) + 
+geom_bar(stat = "identity")
+
+# Question 2
+#Plot on a single graph the average tax (in 2012 dollars) on cigarettes and the average price 
+#of a pack of cigarettes from 1970 to 2018.
+
+q2 <- data %>%
+filter(Year <= 2018)%>%
+group_by(Year)%>%
+summarise(mean_price = mean(price_cpi_2022, na.rm = TRUE), mean_tax = mean(total_tax_cpi_2022, na.rm = TRUE))
+
+figure_q2 <- ggplot(q2, aes(x = Year))+
+geom_line(aes(y = mean_price), color = "red")+
+geom_line(aes(y = mean_tax), color = "blue")
+
+#Question 3
+#Identify the 5 states with the highest increases in cigarette prices (in dollars) over the time 
+#period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
+
+changes_in_price <- data %>%
+select(state, Year, cost_per_pack)%>%
+filter(Year <= 2018)%>%
+pivot_wider(names_from = Year, values_from = cost_per_pack)%>%
+mutate(price_change = `2018`-`1970`)%>%
+select(state, price_change)%>%
+arrange(desc(price_change))%>%
+head(n = 5)
+
+target <- c("New York","District of Columbia","Connecticut","Rhode Island","Massachusetts") %>% paste(collapse = "|")
+
+q3 <- data %>%
+filter(Year <= 2018)%>%
+filter(str_detect(state, target))%>%
+group_by(Year)%>%
+summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
+
+figure_q3 <- ggplot(q3, aes(x = Year, y = mean_sales)) + 
+geom_bar(stat = "identity")
+
+# Question 4
+arrange(changes_in_price, by = price_change)%>%
+head(n=5)
+
+target_2 <- c("Missouri","North Dakota","Tennessee","Georgia","North Carolina") %>% paste(collapse = "|")
+
+q4 <- data %>%
+filter(Year <= 2018)%>%
+filter(str_detect(state, target_2))%>%
+group_by(Year)%>%
+summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
+
+figure_q4 <- ggplot(q4, aes(x = Year, y = mean_sales)) + 
+geom_bar(stat = "identity")
+
+#Question 9
+
+q9_1 <- data %>%
+filter(Year >= 1991 & Year <= 2015)%>%
+group_by(Year)%>%
+summarise(count_tax_change = sum(tax_change_d, na.rm = TRUE))
+
+ggplot(q9_1, aes(x = Year, y = count_tax_change)) + 
+geom_bar(stat = "identity")
+
+q9_2 <- data %>%
+filter(Year >= 1991 & Year <= 2015)%>%
+group_by(Year)%>%
+summarise(mean_price = mean(price_cpi_2022, na.rm = TRUE), mean_tax = mean(total_tax_cpi_2022, na.rm = TRUE))
+
+ggplot(q9_2, aes(x = Year))+
+geom_line(aes(y = mean_price), color = "red")+
+geom_line(aes(y = mean_tax), color = "blue")
+
+changes_in_price_2 <- data %>%
+select(state, Year, cost_per_pack)%>%
+filter(Year >= 1991 & Year <= 2015)%>%
+pivot_wider(names_from = Year, values_from = cost_per_pack)%>%
+mutate(price_change = `2015`-`1991`)%>%
+select(state, price_change)%>%
+arrange(desc(price_change))
+
+head(changes_in_price_2, n = 5)
+
+target_3 <- c("New York","Massachusetts","Alaska","Hawaii","Rhode Island") %>% paste(collapse = "|")
+
+q9_3 <- data %>%
+filter(Year >= 1991 & Year <= 2015)%>%
+filter(str_detect(state, target_3))%>%
+group_by(Year)%>%
+summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
+
+ggplot(q9_3, aes(x = Year, y = mean_sales)) + 
+geom_line()
+
+arrange(changes_in_price_2, by = price_change)%>%
+head(n=5)
+
+target_4 <- c("Missouri","North Dakota","Georgia","North Carolina","West Virginia") %>% paste(collapse = "|")
+
+q9_4 <- data %>%
+filter(Year >= 1991 & Year <= 2015)%>%
+filter(str_detect(state, target_2))%>%
+group_by(Year)%>%
+summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
+
+ggplot(q9_4, aes(x = Year, y = mean_sales)) + 
+geom_line()
