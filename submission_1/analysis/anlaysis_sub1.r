@@ -79,6 +79,22 @@ summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
 figure_q4 <- ggplot(q4, aes(x = Year, y = mean_sales)) + 
 geom_line()
 
+#Question 6
+q6 <- data %>%
+filter(Year <= 1990)
+
+summary(lm(ln_sales ~ ln_price, data = q6))
+
+#Question 7
+summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
+             data=q6))
+
+#Question 8
+step1 <- lm(ln_price ~ ln_tax_2012, data=q6)
+pricehat <- predict(step1)
+step2 <- lm(ln_sales ~ pricehat, data=q6)
+summary(step2)
+
 #Question 9
 
 q9_1 <- data %>%
@@ -132,3 +148,16 @@ summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
 
 ggplot(q9_4, aes(x = Year, y = mean_sales)) + 
 geom_line()
+
+#Question 9 alternate
+q7 <- data %>%
+filter(Year >= 1991 & Year <= 2015)
+
+summary(lm(ln_sales ~ ln_price, data = q7))
+
+summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
+             data=q7))
+step1 <- lm(ln_price ~ ln_tax_2012, data=q7)
+pricehat <- predict(step1)
+step2 <- lm(ln_sales ~ pricehat, data=q7)
+summary(step2)

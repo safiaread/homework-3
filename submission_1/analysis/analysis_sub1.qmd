@@ -116,7 +116,7 @@ Now letâ€™s work on estimating a demand curve for cigarettes. Specifically, weâ€
 
 6. Focusing only on the time period from 1970 to 1990, regress log sales on log prices to estimate the price elasticity of demand over that period. Interpret your results.
 
-The beta1 is -0.8094, which suggests sales and price have an inverse relationship. As price increases we can expect sales to decrease.
+The regression coefficient is -0.8094, which suggests sales and price have an inverse relationship. As price increases we can expect sales to decrease.
 ```{r, echo = F}
 q6 <- data %>%
 filter(Year <= 1990)
@@ -125,6 +125,8 @@ summary(lm(ln_sales ~ ln_price, data = q6))
 ```
 
 7. Again limiting to 1970 to 1990, regress log sales on log prices using the total (federal and state) cigarette tax (in dollars) as an instrument for log prices. Interpret your results and compare your estimates to those without an instrument. Are they different? If so, why?
+
+Yes, the effect is bigger than without the instrument (-1.06252 compared to -0.80944). This is because using tax as an instrument for price can help reduce the effect of confounders, better revealing the true effect.
 
 ```{r, echo = F}
 summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
@@ -201,9 +203,18 @@ I did the above but based on context I think I was actually supposed to repeat s
 ```{r, echo = F}
 q7 <- data %>%
 filter(Year >= 1991 & Year <= 2015)
+```
+
+The regression coefficient is -0.99681, which suggests sales and price have an inverse relationship. As price increases we can expect sales to decrease.
+
+```{r, echo = F}
 
 summary(lm(ln_sales ~ ln_price, data = q7))
+```
 
+Yes, the effect is bigger than without the instrument (-1.28634 compared to -0.99681). This is because using tax as an instrument for price can help reduce the effect of confounders, better revealing the true effect.
+
+```{r, echo = F}
 summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
              data=q7))
 step1 <- lm(ln_price ~ ln_tax_2012, data=q7)
@@ -213,5 +224,7 @@ summary(step2)
 ```
 
 10. Compare your elasticity estimates from 1970-1990 versus those from 1991-2015. Are they different? If so, why?
+
+The elasticity estimates for 1991-2015 are less than 1970-1990, showing the price of cigarettes are more inelastic during that period. This could be because there was more change in price and taxes during the later period, so the inelasticity of the good is better determined.
 
 
