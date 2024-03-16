@@ -44,15 +44,16 @@ geom_line(aes(y = mean_tax), color = "blue")
 #period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
 
 changes_in_price <- data %>%
-select(state, Year, cost_per_pack)%>%
+select(state, Year, price_cpi_2022)%>%
 filter(Year <= 2018)%>%
-pivot_wider(names_from = Year, values_from = cost_per_pack)%>%
+pivot_wider(names_from = Year, values_from = price_cpi_2022)%>%
 mutate(price_change = `2018`-`1970`)%>%
 select(state, price_change)%>%
-arrange(desc(price_change))%>%
-head(n = 5)
+arrange(desc(price_change))
 
-target <- c("New York","District of Columbia","Connecticut","Rhode Island","Massachusetts") %>% paste(collapse = "|")
+head(changes_in_price, n = 5)
+
+target <- c("District of Columbia","New York","Rhode Island","Hawaii", "Massachusetts") %>% paste(collapse = "|")
 
 q3 <- data %>%
 filter(Year <= 2018)%>%
@@ -67,7 +68,7 @@ geom_bar(stat = "identity")
 arrange(changes_in_price, by = price_change)%>%
 head(n=5)
 
-target_2 <- c("Missouri","North Dakota","Tennessee","Georgia","North Carolina") %>% paste(collapse = "|")
+target_2 <- c("Missouri","Tennessee","North Dakota","Alabama", "Georgia") %>% paste(collapse = "|")
 
 q4 <- data %>%
 filter(Year <= 2018)%>%
@@ -76,7 +77,7 @@ group_by(Year)%>%
 summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
 
 figure_q4 <- ggplot(q4, aes(x = Year, y = mean_sales)) + 
-geom_bar(stat = "identity")
+geom_line()
 
 #Question 9
 
@@ -98,9 +99,9 @@ geom_line(aes(y = mean_price), color = "red")+
 geom_line(aes(y = mean_tax), color = "blue")
 
 changes_in_price_2 <- data %>%
-select(state, Year, cost_per_pack)%>%
+select(state, Year, price_cpi_2022)%>%
 filter(Year >= 1991 & Year <= 2015)%>%
-pivot_wider(names_from = Year, values_from = cost_per_pack)%>%
+pivot_wider(names_from = Year, values_from = price_cpi_2022)%>%
 mutate(price_change = `2015`-`1991`)%>%
 select(state, price_change)%>%
 arrange(desc(price_change))
@@ -121,7 +122,7 @@ geom_line()
 arrange(changes_in_price_2, by = price_change)%>%
 head(n=5)
 
-target_4 <- c("Missouri","North Dakota","Georgia","North Carolina","West Virginia") %>% paste(collapse = "|")
+target_4 <- c("North Dakota","Missouri","Georgia","California","Tennessee") %>% paste(collapse = "|")
 
 q9_4 <- data %>%
 filter(Year >= 1991 & Year <= 2015)%>%
