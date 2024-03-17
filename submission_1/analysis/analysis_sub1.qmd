@@ -3,7 +3,7 @@ title: "Homework Three Submission 1"
 author: "Safia Read"
 format:
   pdf:
-    output-file: "read-s-hwk3-1"
+    output-file: "read-s-hwk-3-1"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
