@@ -65,7 +65,7 @@ q4_graph
 #| label: fig-compare-states
 #| fig-cap: "The states with the lowest tax change had sales increase then slowly decrease while state with higher tax changes steadily decreased over time."
 #| fig-pos: "H"
-q5_graph
+q5_graph2
 ```
 
 In both groups, average packs sold decreased. However in the states with the lowest price increases, there are still more sales per capita on average.

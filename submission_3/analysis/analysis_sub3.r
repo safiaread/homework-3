@@ -3,7 +3,7 @@
 #Loading in cleaned dataframe
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest)
-data <- readRDS("submission_3/data-code/TaxBurden_Data.R")
+data <- readRDS("/Users/safiaread/Desktop/homework_3/data/output/TaxBurden_Data.rds")
 
 #Finding changes in tax and prices of cigarettes, also putting in 2012 dollars
 
@@ -117,11 +117,11 @@ mutate(tax_group = ifelse(str_detect(state, target), "highest", "lowest")) %>%
 group_by(Year, tax_group) %>%
 summarise(avg_sales = mean(sales_per_capita))
 
-q5_graph <- ggplot(data = q5, aes(x = Year, y = avg_sales, color = tax_group))+
-geom_line()+
-labs(x = "Year",
-    y = "Average Sales Per Capita",
-    title = "Average Sales for States with the Highest and Lowest Tax Increases")
+q5_graph <- ggplot(data = q5, aes(x = Year, y = avg_sales, color = tax_group)) +
+geom_line()
+
+q5_graph2 <- q5_graph +
+labs(x = "Year", y = "Average Sales Per Capita", title = "Sales for States with the Highest and Lowest Tax Increases")
 
 #Question 6
 q6 <- data %>%
