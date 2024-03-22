@@ -3,7 +3,7 @@
 #Loading in cleaned dataframe
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest)
-data <- readRDS("/Users/safiaread/Desktop/homework_3/data/output/TaxBurden_Data.rds")
+data <- readRDS("submission_3/data-code/TaxBurden_Data.R")
 
 #Finding changes in tax and prices of cigarettes, also putting in 2012 dollars
 
@@ -40,11 +40,16 @@ labs(
 q2 <- data %>%
 filter(Year <= 2018)%>%
 group_by(Year)%>%
-summarise(mean_price = mean(price_cpi_2022, na.rm = TRUE), mean_tax = mean(total_tax_cpi_2022, na.rm = TRUE))
+summarise(mean_price = mean(price_cpi_2022, na.rm = TRUE), mean_tax = mean(tax_cpi_2022, na.rm = TRUE))
 
-figure_q2 <- ggplot(q2, aes(x = Year))+
-geom_line(aes(y = mean_price), color = "red")+
-geom_line(aes(y = mean_tax), color = "blue")
+q2_graph <- ggplot(q2, aes(x = Year))+
+geom_line(aes(y = mean_price, color = "red"))+
+geom_line(aes(y = mean_tax, color = "blue", linetype = "dashed"))+
+labs(
+    x="Year",
+    y="Average Price",
+    title="Average Price and Cigarette Tax Over Time") + scale_color_manual(values = c("red", "blue"), labels = c("Price in 2012 Dollars", "Average Tax"),name = " ") + 
+    guides(linetype = "none")
 
 #Question 3
 #Identify the 5 states with the highest increases in cigarette prices (in dollars) over the time 
@@ -68,12 +73,20 @@ filter(str_detect(state, target))%>%
 group_by(Year)%>%
 summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
 
-figure_q3 <- ggplot(q3, aes(x = Year, y = mean_sales)) + 
-geom_bar(stat = "identity")
+q3_1 <- data %>%
+filter(Year <= 2018)%>%
+filter(str_detect(state, target))
+
+q3_graph <- ggplot(q3_1, aes(x = Year, y = sales_per_capita, color = state)) + 
+geom_line()+
+labs(
+    x="Year",
+    y="Average Sales Per Capita",
+    title="Average Sales for States with the 5 Highest Increases in Tax")
 
 # Question 4
-arrange(changes_in_price, by = price_change)%>%
-head(n=5)
+#arrange(changes_in_price, by = price_change)%>%
+#head(n=5)
 
 target_2 <- c("Missouri","Tennessee","North Dakota","Alabama", "Georgia") %>% paste(collapse = "|")
 
@@ -83,92 +96,79 @@ filter(str_detect(state, target_2))%>%
 group_by(Year)%>%
 summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
 
-figure_q4 <- ggplot(q4, aes(x = Year, y = mean_sales)) + 
-geom_line()
+q4_2 <- data %>%
+filter(Year <= 2018)%>%
+filter(str_detect(state, target_2))
+
+q4_graph <- ggplot(q4_2, aes(x = Year, y = sales_per_capita, color = state)) + 
+geom_line()+
+labs(
+    x="Year",
+    y="Average Sales Per Capita",
+    title="Average Sales for States with the 5 Lowest Increases in Tax")
+
+#Question 5
+target_3 <- c("District of Columbia","New York","Rhode Island","Hawaii", "Massachusetts","Missouri","Tennessee","North Dakota","Alabama", "Georgia") %>% paste(collapse = "|")
+
+q5 <- data %>%
+filter(Year <= 2018)%>%
+filter(str_detect(state, target_3))%>%
+mutate(tax_group = ifelse(str_detect(state, target),"highest","lowest"))%>%
+group_by(Year, tax_group)%>%
+summarise(avg_sales = mean(sales_per_capita))
+
+q5_graph <- ggplot(data = q5, aes(x = Year, y = avg_sales, color = tax_group))+
+geom_line()+
+labs(
+    x="Year",
+    y="Average Sales Per Capita",
+    title="Average Sales for the States with the 5 Highest and 5 Lowest Increases in Tax")
 
 #Question 6
 q6 <- data %>%
 filter(Year <= 1990)
 
-summary(lm(ln_sales ~ ln_price, data = q6))
+##q6_reg <- summary(lm(ln_sales ~ ln_price, data = q6))
+
+q6_1 <- coef(feols(ln_sales ~ ln_price, data = q6))
+q6_reg_coeff <- q6_1[2]
+##q6_reg_coeff <- q6_reg$coefficients[1,1]
 
 #Question 7
-summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
-             data=q6))
+q7 <- coef(summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
+             data=q6)))
+q7_reg <- q7[2]
 
 #Question 8
-step1 <- lm(ln_price ~ ln_tax_2012, data=q6)
+step1 <- feols(ln_price ~ ln_tax_2012, data=q6)
+step1_1 <- coef(step1)
+step1_reg <- step1_1[2]
+##step1_reg <- summary(step1)$coefficients[1,1]
 pricehat <- predict(step1)
-step2 <- lm(ln_sales ~ pricehat, data=q6)
-summary(step2)
+step2 <- feols(ln_sales ~ pricehat, data=q6)
+step2_1 <- coef(step2)
+step2_reg <- step2_1[2]
+##step2_reg <- summary(step2)$coefficients[1,1]
 
 #Question 9
 
-q9_1 <- data %>%
-filter(Year >= 1991 & Year <= 2015)%>%
-group_by(Year)%>%
-summarise(count_tax_change = sum(tax_change_d, na.rm = TRUE))
-
-ggplot(q9_1, aes(x = Year, y = count_tax_change)) + 
-geom_bar(stat = "identity")
-
-q9_2 <- data %>%
-filter(Year >= 1991 & Year <= 2015)%>%
-group_by(Year)%>%
-summarise(mean_price = mean(price_cpi_2022, na.rm = TRUE), mean_tax = mean(total_tax_cpi_2022, na.rm = TRUE))
-
-ggplot(q9_2, aes(x = Year))+
-geom_line(aes(y = mean_price), color = "red")+
-geom_line(aes(y = mean_tax), color = "blue")
-
-changes_in_price_2 <- data %>%
-select(state, Year, price_cpi_2022)%>%
-filter(Year >= 1991 & Year <= 2015)%>%
-pivot_wider(names_from = Year, values_from = price_cpi_2022)%>%
-mutate(price_change = `2015`-`1991`)%>%
-select(state, price_change)%>%
-arrange(desc(price_change))
-
-head(changes_in_price_2, n = 5)
-
-target_3 <- c("New York","Massachusetts","Alaska","Hawaii","Rhode Island") %>% paste(collapse = "|")
-
-q9_3 <- data %>%
-filter(Year >= 1991 & Year <= 2015)%>%
-filter(str_detect(state, target_3))%>%
-group_by(Year)%>%
-summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
-
-ggplot(q9_3, aes(x = Year, y = mean_sales)) + 
-geom_line()
-
-arrange(changes_in_price_2, by = price_change)%>%
-head(n=5)
-
-target_4 <- c("North Dakota","Missouri","Georgia","California","Tennessee") %>% paste(collapse = "|")
-
-q9_4 <- data %>%
-filter(Year >= 1991 & Year <= 2015)%>%
-filter(str_detect(state, target_2))%>%
-group_by(Year)%>%
-summarise(mean_sales = mean(sales_per_capita, na.rm = TRUE))
-
-ggplot(q9_4, aes(x = Year, y = mean_sales)) + 
-geom_line()
-
-#Question 9 alternate
-q7 <- data %>%
+q9 <- data %>%
 filter(Year >= 1991 & Year <= 2015)
+#q9_reg1 <- summary(lm(ln_sales ~ ln_price, data = q9))$coefficients[1,1]
+q9_1 <- coef(feols(ln_sales ~ ln_price, data = q9))
+q9_reg1 <- q9_1[2]
 
-summary(lm(ln_sales ~ ln_price, data = q7))
+q9_2 <- coef(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
+             data=q9))
+q9_reg2 <- q9_2[2]
 
-summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
-             data=q7))
-step1 <- lm(ln_price ~ ln_tax_2012, data=q7)
-pricehat <- predict(step1)
-step2 <- lm(ln_sales ~ pricehat, data=q7)
-summary(step2)
+q9_step1 <- feols(ln_price ~ ln_tax_2012, data=q9)
+q9_step1_1 <- coef(q9_step1)
+q9_step1_reg <- q9_step1_1[2]
+pricehat <- predict(q9_step1)
+q9_step2 <- feols(ln_sales ~ pricehat, data=q9)
+q9_step2_1 <- coef(q9_step2)
+q9_step2_reg <- q9_step2_1[2]
 
-rm(list=c("data","q1", "service",
-           "penetration", "premiums", "full_service", "pen_full_serv", "state_rename", "all_data")) # nolint
-save.image("submission3/Hwk3_workspace.Rdata")
+rm(list=c("data", "q1", "q2", "changes_in_price", "q3", "q3_1", "q4", "q4_2", "q5", "q6", "q9")) # nolint
+save.image("submission_3/Hwk3_workspace.Rdata")
