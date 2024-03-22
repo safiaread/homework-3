@@ -18,7 +18,7 @@ https://github.com/safiaread/homework-3
 
 ```{r, echo = F, message = F}
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest)
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest, xtable)
 load("/Users/safiaread/Desktop/homework_3/submission_3/Hwk3_workspace.Rdata")
 ```
 
@@ -46,6 +46,7 @@ q2_graph
 ```{r, echo = F}
 #| label: fig-highest-states
 #| fig-cap: "The sales per capita of cigarettes decrease from around 150 to 25."
+#| fig-pos: "H"
 q3_graph
 ```
 
@@ -54,6 +55,7 @@ q3_graph
 ```{r, echo = F}
 #| label: fig-lowest-states
 #| fig-cap: "The sales per capita of cigarettes decrease from around 115 to 65."
+#| fig-pos: "H"
 q4_graph
 ```
 
@@ -62,6 +64,7 @@ q4_graph
 ```{r, echo = F, warning = F}
 #| label: fig-compare-states
 #| fig-cap: "The states with the lowest tax change had sales increase then slowly decrease while state with higher tax changes steadily decreased over time."
+#| fig-pos: "H"
 q5_graph
 ```
 
@@ -77,7 +80,7 @@ The regression coefficient is `r q6_reg_coeff`, which suggests sales and price h
 
 7. Again limiting to 1970 to 1990, regress log sales on log prices using the total (federal and state) cigarette tax (in dollars) as an instrument for log prices. Interpret your results and compare your estimates to those without an instrument. Are they different? If so, why?sh push
 
-Yes, the effect is bigger than without the instrument (`r q7_reg` compared to `r q6_reg_coeff`). This is because using tax as an instrument for price can help reduce the effect of confounders, better revealing the true effect.
+Yes, the effect is smaller when the instrument is included (`r q7_reg` compared to `r q6_reg_coeff`). This is because using tax as an instrument for price can help reduce the effect of confounders, better revealing the true effect.
 
 8. Show the first stage and reduced-form results from the instrument.
 
@@ -87,12 +90,20 @@ The regression coefficient of the first step is `r step1_reg`. The regression co
 
 The regression coefficient of the log of sales on the log of price is `r q9_reg1`, which suggests sales and price have an inverse relationship. As price increases we can expect sales to decrease.
 
-Yes, the estimated effect of price on sales is bigger than without the instrument (`r q9_reg2` compared to `r q9_reg1`). This is because using tax as an instrument for price can help reduce the effect of confounders, better revealing the true effect.
+Yes, the estimated effect of price on sales is bigger when including the instrument (`r q9_reg2` compared to `r q9_reg1`). This is because using tax as an instrument for price can help reduce the effect of confounders, better revealing the true effect. If we believe in the assumptions of the instrument, the analysis suggests that increasing the price of cigarrettes reduces the demand for cigarretes.
 
 In the two stage regressions, the regression coefficient of the first step is `r q9_step1_reg`. The regression coefficient of the second step is `r q9_step2_reg`. This is the same as the feols estimate.
 
 10. Compare your elasticity estimates from 1970-1990 versus those from 1991-2015. Are they different? If so, why?
+```{r}
+#| echo: false
+#| label: tbl-regression
+#| tbl-cap: "Regression Outputs Ovver the Two Periods"
 
-The elasticity estimates for 1991-2015 are less than 1970-1990, showing the price of cigarettes are more inelastic during the first period. This could be because there was more change in price and taxes during the later period, so the inelasticity of the good is better determined.
+regression_table
+```
+
+The  elasticity estimates for 1991-2015 are farther from 0 than 1970-1990, showing the price of cigarettes are more inelastic during the first period. This could be because there was more change in price and taxes during the later period, so the inelasticity of the good is better determined. Also, as time went on, smoking became less encouraged in culture as they were banned from public spaces and public health campaigns emerged. Maybe prices had increase combined with the price shift means less people started and maintained smoking habits to the degree they did before. Less addiction could mean more price elasticity.
+
 
 
