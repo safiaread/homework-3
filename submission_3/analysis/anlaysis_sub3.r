@@ -7,8 +7,8 @@ data <- readRDS("submission_3/data-code/TaxBurden_Data.R")
 
 #Finding changes in tax and prices of cigarettes, also putting in 2012 dollars
 
-data <- data %>% group_by(state)%>%
-arrange(state, Year)%>%
+data <- data %>% group_by(state) %>%
+arrange(state, Year) %>%
 mutate(tax_change = tax_state-lag(tax_state), 
 tax_change_d = ifelse(tax_change == 0,0,1), 
 price_cpi_2022 = cost_per_pack*(cpi_2012/index), 
@@ -111,18 +111,17 @@ labs(
 target_3 <- c("District of Columbia","New York","Rhode Island","Hawaii", "Massachusetts","Missouri","Tennessee","North Dakota","Alabama", "Georgia") %>% paste(collapse = "|")
 
 q5 <- data %>%
-filter(Year <= 2018)%>%
-filter(str_detect(state, target_3))%>%
-mutate(tax_group = ifelse(str_detect(state, target),"highest","lowest"))%>%
-group_by(Year, tax_group)%>%
+filter(Year <= 2018) %>%
+filter(str_detect(state, target_3)) %>%
+mutate(tax_group = ifelse(str_detect(state, target), "highest", "lowest")) %>%
+group_by(Year, tax_group) %>%
 summarise(avg_sales = mean(sales_per_capita))
 
 q5_graph <- ggplot(data = q5, aes(x = Year, y = avg_sales, color = tax_group))+
 geom_line()+
-labs(
-    x="Year",
-    y="Average Sales Per Capita",
-    title="Average Sales for the States with the 5 Highest and 5 Lowest Increases in Tax")
+labs(x = "Year",
+    y = "Average Sales Per Capita",
+    title = "Average Sales for States with the Highest and Lowest Tax Increases")
 
 #Question 6
 q6 <- data %>%
@@ -135,12 +134,11 @@ q6_reg_coeff <- q6_1[2]
 ##q6_reg_coeff <- q6_reg$coefficients[1,1]
 
 #Question 7
-q7 <- coef(summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
-             data=q6)))
+q7 <- coef(summary(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, data=q6)))
 q7_reg <- q7[2]
 
 #Question 8
-step1 <- feols(ln_price ~ ln_tax_2012, data=q6)
+step1 <- feols(ln_price ~ ln_tax_2012, data = q6)
 step1_1 <- coef(step1)
 step1_reg <- step1_1[2]
 ##step1_reg <- summary(step1)$coefficients[1,1]
@@ -158,8 +156,7 @@ filter(Year >= 1991 & Year <= 2015)
 q9_1 <- coef(feols(ln_sales ~ ln_price, data = q9))
 q9_reg1 <- q9_1[2]
 
-q9_2 <- coef(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, 
-             data=q9))
+q9_2 <- coef(feols(ln_sales ~ 1 | ln_price ~ ln_tax_2012, data=q9))
 q9_reg2 <- q9_2[2]
 
 q9_step1 <- feols(ln_price ~ ln_tax_2012, data=q9)
@@ -171,4 +168,4 @@ q9_step2_1 <- coef(q9_step2)
 q9_step2_reg <- q9_step2_1[2]
 
 rm(list=c("data", "q1", "q2", "changes_in_price", "q3", "q3_1", "q4", "q4_2", "q5", "q6", "q9")) # nolint
-save.image("submission_3/Hwk3_workspace.Rdata")
+save.image("/Users/safiaread/Desktop/homework_3/submission_3/Hwk3_workspace.Rdata")
